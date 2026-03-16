@@ -72,6 +72,10 @@ See Section 4 in `main_notebook.ipynb` for the full reference list with links.
 
 Final exam project for Math Concepts for Developers course, March 2026.
 
+## Note on Git History
+
+This repository was rebuilt from a local copy. The original commit history (15+ commits made over the development period) was overwritten during a force push when syncing with GitHub. The current 2 commits represent the final consolidated state of the project.
+
 ## License
 
 Educational purposes only.
