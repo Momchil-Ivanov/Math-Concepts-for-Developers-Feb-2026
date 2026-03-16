@@ -22,6 +22,10 @@ This project explores how cooperation can emerge in competitive environments thr
 - `visualization.py` - Plotting and visualization functions
 - `requirements.txt` - Python dependencies
 
+## Requirements
+
+- **Python:** 3.14.0 (tested with this version only)
+
 ## Installation
 
 ```bash
@@ -47,10 +51,10 @@ jupyter notebook main_notebook.ipynb
 1. Always Cooperate
 2. Always Defect
 3. Random
-4. Tit-for-Tat (Axelrod's winner)
+4. Tit-for-Tat
 5. Tit-for-Two-Tats
 6. Grim Trigger
-7. Pavlov (Win-Stay, Lose-Shift)
+7. Pavlov
 8. Generous Tit-for-Tat
 9. Gradual
 10. Suspicious Tit-for-Tat
