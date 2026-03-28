@@ -1,7 +1,7 @@
 """
 Iterated Prisoner's Dilemma Strategy Implementations
 
-This module contains 14 strategy classes for playing the Iterated Prisoner's Dilemma.
+This module contains strategy classes for playing the Iterated Prisoner's Dilemma.
 Each strategy inherits from the abstract base Strategy class and implements a 
 choose_action() method that returns 'C' (cooperate) or 'D' (defect).
 
@@ -399,6 +399,110 @@ class HardMajority(Strategy):
         return 'C' if cooperation_rate > 0.5 else 'D'
 
 
+class ReverseTitForTat(Strategy):
+    """
+    Cooperates on the first move, then plays the *opposite* of the opponent's
+    previous move (C -> D, D -> C).
+
+    Contrasts with Tit-for-Tat (which copies): this rule is exploitative
+    against unconditional cooperators and anti-correlated with cooperative play.
+    """
+
+    def __init__(self):
+        super().__init__("Reverse Tit-for-Tat")
+
+    def choose_action(self, my_history, opponent_history):
+        if len(opponent_history) == 0:
+            return 'C'
+        return 'D' if opponent_history[-1] == 'C' else 'C'
+
+
+class OmegaTitForTat(Strategy):
+    """
+    Tit-for-Tat with a forgiveness rule after long mutual punishment (Omega TFT).
+
+    Cooperates first; otherwise copies the opponent's last move *unless* there
+    have been at least ``omega`` consecutive rounds of mutual defection, in
+    which case it cooperates once to try to break the deadlock.
+    """
+
+    def __init__(self, omega=3):
+        super().__init__("Omega Tit-for-Tat")
+        self.omega = omega
+
+    @staticmethod
+    def _mutual_defection_streak(my_history, opponent_history):
+        n = 0
+        for i in range(len(my_history) - 1, -1, -1):
+            if my_history[i] == 'D' and opponent_history[i] == 'D':
+                n += 1
+            else:
+                break
+        return n
+
+    def choose_action(self, my_history, opponent_history):
+        if len(opponent_history) == 0:
+            return 'C'
+        if (
+            self._mutual_defection_streak(my_history, opponent_history) >= self.omega
+        ):
+            return 'C'
+        return opponent_history[-1]
+
+
+class Tester(Strategy):
+    """
+    Axelrod-style tester: defects on the first move to probe the opponent.
+
+    If the opponent cooperated after being defected against (move 1), it
+    continues defecting (exploits a "pushover"). Otherwise it plays Tit-for-Tat.
+    Distinct from Prober (D-C-C opening) and Suspicious Tit-for-Tat (always
+    copies after opening D).
+    """
+
+    def __init__(self):
+        super().__init__("Tester")
+        self._exploit = None
+
+    def choose_action(self, my_history, opponent_history):
+        if len(opponent_history) == 0:
+            return 'D'
+        if len(opponent_history) == 1:
+            self._exploit = opponent_history[0] == 'C'
+            return 'D' if self._exploit else opponent_history[-1]
+        if self._exploit:
+            return 'D'
+        return opponent_history[-1]
+
+    def reset(self):
+        self._exploit = None
+
+
+class FirmButFair(Strategy):
+    """
+    Firm But Fair (Kraines & Kraines–style): cooperates unless suckered;
+    after mutual defection, cooperates with probability ``p`` to escape DD traps.
+
+    - First move: cooperate.
+    - If last round was (C, D) — punished for cooperating: defect.
+    - If last round was (D, D): cooperate with probability ``p``, else defect.
+    - Otherwise: cooperate.
+    """
+
+    def __init__(self, cooperation_after_mutual_d=0.5):
+        super().__init__("Firm But Fair")
+        self.p_recover = cooperation_after_mutual_d
+
+    def choose_action(self, my_history, opponent_history):
+        if len(my_history) == 0:
+            return 'C'
+        if my_history[-1] == 'C' and opponent_history[-1] == 'D':
+            return 'D'
+        if my_history[-1] == 'D' and opponent_history[-1] == 'D':
+            return 'C' if random.random() < self.p_recover else 'D'
+        return 'C'
+
+
 def get_all_strategies():
     """
     Convenience function to create instances of all implemented strategies.
@@ -422,5 +526,9 @@ def get_all_strategies():
         Adaptive(),
         HardTitForTat(),
         SoftMajority(),
-        HardMajority()
+        HardMajority(),
+        ReverseTitForTat(),
+        OmegaTitForTat(),
+        Tester(),
+        FirmButFair(),
     ]

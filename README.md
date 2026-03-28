@@ -4,7 +4,7 @@ A comprehensive mathematical analysis of cooperation and competition in the Iter
 
 ## Overview
 
-This project explores how cooperation can emerge in competitive environments through repeated interactions. Using mathematical game theory and computational simulations, we analyze 15 different strategies competing in tournaments and evolving over generations.
+This project explores how cooperation can emerge in competitive environments through repeated interactions. Using mathematical game theory and computational simulations, we analyze 19 different strategies competing in tournaments and evolving over generations.
 
 ## Key Questions
 
@@ -65,6 +65,10 @@ jupyter notebook main_notebook.ipynb
 13. Hard Tit-for-Tat
 14. Soft Majority
 15. Hard Majority
+16. Reverse Tit-for-Tat
+17. Omega Tit-for-Tat
+18. Tester
+19. Firm But Fair
 
 ## Key References
 
