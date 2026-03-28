@@ -16,10 +16,11 @@ This project explores how cooperation can emerge in competitive environments thr
 ## Project Structure
 
 - `main_notebook.ipynb` - Primary analysis with theory, code, and results
-- `strategies.py` - Strategy class implementations
-- `tournament.py` - Tournament engine and match system
-- `analysis.py` - Statistical analysis functions
-- `visualization.py` - Plotting and visualization functions
+- `prisoners_dilemma/` - Python package (import e.g. `from prisoners_dilemma import ...`)
+  - `strategies.py` - Strategy class implementations
+  - `tournament.py` - Tournament engine and match system
+  - `analysis.py` - Statistical analysis functions
+  - `visualization.py` - Plotting and visualization functions
 - `requirements.txt` - Python dependencies
 
 ## Requirements

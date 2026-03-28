@@ -14,7 +14,7 @@ Date: March 2026
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from strategies import Strategy
+from .strategies import Strategy
 
 
 class Game:
