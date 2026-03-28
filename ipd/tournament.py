@@ -13,34 +13,24 @@ Date: March 2026
 
 import numpy as np
 import pandas as pd
-from itertools import combinations
+from .payoffs import DEFAULT_PAYOFFS
 from .strategies import Strategy
 
 
 class Game:
     """
     Manages a single IPD match between two strategies.
-    
-    Uses standard Prisoner's Dilemma payoffs:
-    - T (Temptation): 5 - payoff for defecting when opponent cooperates
-    - R (Reward): 3 - payoff for mutual cooperation
-    - P (Pdefection
-    - S (Sucker): 0 - payoff for cunishment): 1 - payoff for mutual ooperating when opponent defects
-    
-    These satisfy the PD ordering: T > R > P > S and 2R > T + S
+
+    Payoffs use standard PD parameters (T, R, P, S) via PayoffParams; by default
+    T=5, R=3, P=1, S=0, satisfying T > R > P > S and 2R > T + S.
     """
-    
-    def __init__(self, strategy1, strategy2, rounds=200):
+
+    def __init__(self, strategy1, strategy2, rounds=200, payoff_params=None):
         self.strategy1 = strategy1
         self.strategy2 = strategy2
         self.rounds = rounds
-        
-        self.payoffs = {
-            ('C', 'C'): (3, 3),
-            ('C', 'D'): (0, 5),
-            ('D', 'C'): (5, 0),
-            ('D', 'D'): (1, 1)
-        }
+        self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
+        self.payoffs = self.payoff_params.to_pair_payoffs()
         
         self.history1 = []
         self.history2 = []
@@ -94,9 +84,10 @@ class Tournament:
     specified number of rounds. Results are aggregated to determine rankings.
     """
     
-    def __init__(self, strategies, rounds_per_match=200):
+    def __init__(self, strategies, rounds_per_match=200, payoff_params=None):
         self.strategies = strategies
         self.rounds_per_match = rounds_per_match
+        self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
         self.results = []
         self.scores = {strategy.name: 0 for strategy in strategies}
         self.matches_played = {strategy.name: 0 for strategy in strategies}
@@ -120,7 +111,12 @@ class Tournament:
                     continue
                 
                 match_count += 1
-                game = Game(strategy1, strategy2, self.rounds_per_match)
+                game = Game(
+                    strategy1,
+                    strategy2,
+                    self.rounds_per_match,
+                    payoff_params=self.payoff_params,
+                )
                 result = game.play_match()
                 
                 self.results.append(result)
@@ -189,10 +185,17 @@ class EvolutionarySimulation:
     in frequency, while lower-fitness strategies decrease.
     """
     
-    def __init__(self, strategies, rounds_per_encounter=50, initial_population=None):
+    def __init__(
+        self,
+        strategies,
+        rounds_per_encounter=50,
+        initial_population=None,
+        payoff_params=None,
+    ):
         self.strategies = strategies
         self.rounds_per_encounter = rounds_per_encounter
-        
+        self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
+
         if initial_population is None:
             n = len(strategies)
             self.population = np.ones(n) / n
@@ -215,7 +218,12 @@ class EvolutionarySimulation:
         
         for i, strategy1 in enumerate(self.strategies):
             for j, strategy2 in enumerate(self.strategies):
-                game = Game(strategy1, strategy2, self.rounds_per_encounter)
+                game = Game(
+                    strategy1,
+                    strategy2,
+                    self.rounds_per_encounter,
+                    payoff_params=self.payoff_params,
+                )
                 result = game.play_match()
                 matrix[i, j] = result['avg_score1']
         

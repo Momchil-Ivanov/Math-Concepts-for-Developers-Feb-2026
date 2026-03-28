@@ -14,6 +14,8 @@ from abc import ABC, abstractmethod
 import random
 import numpy as np
 
+from .payoffs import DEFAULT_PAYOFFS, PayoffParams
+
 
 class Strategy(ABC):
     """
@@ -292,16 +294,19 @@ class Prober(Strategy):
 class Adaptive(Strategy):
     """
     Adapts based on which action (C or D) yields better average payoff.
-    
+
     Tracks average scores when cooperating vs defecting, and increasingly
-    favors the action that performed better. Uses standard PD payoffs.
+    favors the action that performed better. Payoffs match PayoffParams
+    (default: same as tournament / Game). For custom tournament payoffs,
+    pass the same PayoffParams here.
     """
-    
-    def __init__(self):
+
+    def __init__(self, payoff_params: PayoffParams | None = None):
         super().__init__("Adaptive")
         self.c_scores = []
         self.d_scores = []
-        self.payoffs = {('C', 'C'): 3, ('C', 'D'): 0, ('D', 'C'): 5, ('D', 'D'): 1}
+        self._payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
+        self.payoffs = self._payoff_params.my_action_payoffs()
     
     def choose_action(self, my_history, opponent_history):
         if len(my_history) < 6:
