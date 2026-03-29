@@ -22,6 +22,8 @@ This project explores how cooperation can emerge in competitive environments thr
   - `tournament.py` - Tournament engine and match system
   - `analysis.py` - Statistical analysis functions
   - `visualization.py` - Plotting and visualization functions
+- `tests/` - Pytest suite (`test_payoffs.py`, `test_game_noise.py`)
+- `pytest.ini` - Pytest config (project root; sets `pythonpath` and `testpaths`)
 - `requirements.txt` - Python dependencies
 
 ## Requirements
@@ -39,6 +41,28 @@ pip install -r requirements.txt
 ```bash
 jupyter notebook main_notebook.ipynb
 ```
+
+## Testing
+
+From the project root (same folder as `ipd/` and `pytest.ini`):
+
+```bash
+python -m pytest tests/ -v
+```
+
+- `tests/test_payoffs.py` — PD ordering constraints, `PayoffParams` validation, payoff matrices
+- `tests/test_game_noise.py` — Trembling-hand noise on `Game` (`noise=0` vs `noise=1.0`)
+
+`pytest` is listed in `requirements.txt`.
+
+## Extensions (notebook)
+
+Beyond the baseline tournament and evolutionary analysis, `main_notebook.ipynb` also covers:
+
+- **Section 5.5** — Round-robin tournaments with **trembling-hand noise** (execution error after each intended move). Implemented via `noise` on `Game`, `Tournament`, and `EvolutionarySimulation` in `ipd/tournament.py`, with rankings compared across noise levels.
+- **Section 5.6** — **Payoff parameter sweep** (e.g. varying temptation `T` through `PayoffParams`) with plots.
+
+Section 6 ties these extensions back to the main conclusions.
 
 ## Mathematical Concepts Covered
 
@@ -80,7 +104,9 @@ Final exam project for Math Concepts for Developers course, March 2026.
 
 ## Note on Git History
 
-This repository was rebuilt from a local copy. The original commit history (15+ commits made over the development period) was overwritten during a force push when syncing with GitHub. The current 2 commits represent the final consolidated state of the project.
+For the **first project submission**, a **force push removed the commit history** on GitHub, so that version no longer showed an incremental record of the work—only the state of the files at that time.
+
+This repo is the **retake**. Its branch has **10 meaningful commits**, each covering a clear unit of work (implementation, tests, documentation), so Git shows how the project was built—unlike the first submission, where that history was lost to the force push.
 
 ## License
 
