@@ -23,32 +23,56 @@ class Game:
 
     Payoffs use standard PD parameters (T, R, P, S) via PayoffParams; by default
     T=5, R=3, P=1, S=0, satisfying T > R > P > S and 2R > T + S.
+
+    ``noise`` implements trembling-hand execution error: after each side chooses
+    C or D, that action is flipped independently with probability ``noise``.
+    Histories and payoffs use the executed (possibly flipped) actions.
     """
 
-    def __init__(self, strategy1, strategy2, rounds=200, payoff_params=None):
+    def __init__(
+        self,
+        strategy1,
+        strategy2,
+        rounds=200,
+        payoff_params=None,
+        noise=0.0,
+        rng=None,
+    ):
         self.strategy1 = strategy1
         self.strategy2 = strategy2
         self.rounds = rounds
         self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
         self.payoffs = self.payoff_params.to_pair_payoffs()
-        
+        self.noise = float(noise)
+        self._rng = np.random.default_rng(rng)
+
         self.history1 = []
         self.history2 = []
         self.score1 = 0
         self.score2 = 0
-    
+
+    def _maybe_flip(self, action):
+        if self.noise <= 0:
+            return action
+        if self._rng.random() < self.noise:
+            return "D" if action == "C" else "C"
+        return action
+
     def play_round(self):
         action1 = self.strategy1.choose_action(self.history1, self.history2)
         action2 = self.strategy2.choose_action(self.history2, self.history1)
-        
-        self.history1.append(action1)
-        self.history2.append(action2)
-        
-        payoff1, payoff2 = self.payoffs[(action1, action2)]
+
+        exec1 = self._maybe_flip(action1)
+        exec2 = self._maybe_flip(action2)
+
+        self.history1.append(exec1)
+        self.history2.append(exec2)
+
+        payoff1, payoff2 = self.payoffs[(exec1, exec2)]
         self.score1 += payoff1
         self.score2 += payoff2
-        
-        return action1, action2, payoff1, payoff2
+
+        return exec1, exec2, payoff1, payoff2
     
     def play_match(self):
         self.strategy1.reset()
@@ -84,10 +108,19 @@ class Tournament:
     specified number of rounds. Results are aggregated to determine rankings.
     """
     
-    def __init__(self, strategies, rounds_per_match=200, payoff_params=None):
+    def __init__(
+        self,
+        strategies,
+        rounds_per_match=200,
+        payoff_params=None,
+        noise=0.0,
+        rng=None,
+    ):
         self.strategies = strategies
         self.rounds_per_match = rounds_per_match
         self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
+        self.noise = float(noise)
+        self._rng = np.random.default_rng(rng)
         self.results = []
         self.scores = {strategy.name: 0 for strategy in strategies}
         self.matches_played = {strategy.name: 0 for strategy in strategies}
@@ -116,6 +149,8 @@ class Tournament:
                     strategy2,
                     self.rounds_per_match,
                     payoff_params=self.payoff_params,
+                    noise=self.noise,
+                    rng=self._rng,
                 )
                 result = game.play_match()
                 
@@ -191,10 +226,14 @@ class EvolutionarySimulation:
         rounds_per_encounter=50,
         initial_population=None,
         payoff_params=None,
+        noise=0.0,
+        rng=None,
     ):
         self.strategies = strategies
         self.rounds_per_encounter = rounds_per_encounter
         self.payoff_params = payoff_params if payoff_params is not None else DEFAULT_PAYOFFS
+        self.noise = float(noise)
+        self._rng = np.random.default_rng(rng)
 
         if initial_population is None:
             n = len(strategies)
@@ -223,6 +262,8 @@ class EvolutionarySimulation:
                     strategy2,
                     self.rounds_per_encounter,
                     payoff_params=self.payoff_params,
+                    noise=self.noise,
+                    rng=self._rng,
                 )
                 result = game.play_match()
                 matrix[i, j] = result['avg_score1']
