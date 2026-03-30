@@ -24,6 +24,7 @@ This project explores how cooperation can emerge in competitive environments thr
   - `visualization.py` - Plotting and visualization functions
 - `tests/` - Pytest suite (`test_payoffs.py`, `test_game_noise.py`)
 - `pytest.ini` - Pytest config (project root; sets `pythonpath` and `testpaths`)
+- `pyproject.toml` - Setuptools metadata so you can `pip install -e .` (editable install of the `ipd` package)
 - `requirements.txt` - Python dependencies
 
 ## Requirements
@@ -32,15 +33,32 @@ This project explores how cooperation can emerge in competitive environments thr
 
 ## Installation
 
+After cloning, work from the project root (the folder that contains `ipd/`, `main_notebook.ipynb`, and `pyproject.toml`).
+
+```bash
+cd iterated-prisoners-dilemma-analysis
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+On Linux/macOS use `source .venv/bin/activate` instead of `.venv\Scripts\activate`.
+
+Install dependencies, then **install this repo in editable mode** (required so `import ipd` works after a fresh clone):
+
 ```bash
 pip install -r requirements.txt
+pip install -e .
 ```
+
+`pip install -e .` registers the local `ipd` package in the active environment. Use the **same Python / venv / Jupyter kernel** where you ran those commands when you open the notebook.
 
 ## Usage
 
 ```bash
 jupyter notebook main_notebook.ipynb
 ```
+
+If the notebook kernel is not the environment where you ran `pip install -e .`, imports will fail—select the correct interpreter or re-run the install steps in that environment.
 
 ## Testing
 
